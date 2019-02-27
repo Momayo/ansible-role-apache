@@ -20,12 +20,12 @@
       state: present
     become: true
     when: "not letsencrypt_cert.stat.exists"
+  
   - name: "run command to get certificate"
     command: "certbot --apache certonly --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}"
     with_items: "{{ apache_vhosts }}"
-    when: "item.ssl is defined and item.ssl == true"
     become: true  
-    when: "apache_certbot == true and not letsencrypt_cert.stat.exists"
+    when: "apache_certbot == true and not letsencrypt_cert.stat.exists and item.ssl is defined and item.ssl== true"
   
   - name: "delete temp file from server"
     file:
@@ -45,5 +45,21 @@
     with_items: "{{ apache_vhosts}}"
     vars:
       current_vhost: "{{ item.servername }}"
+ 
+  - name: "Add commands to sudoers file"
+    lineinfile:
+      path: /etc/sudoers
+      line: "{{ item }}"
+      validate: '/usr/sbin/visudo -cf %s'
+    with_items:
+      - "{{ worker_name }} ALL=(ALL) NOPASSWD: /usr/bin/certbot renew"
   
-    
+  - name: "add cron job"
+    cron:
+      name: "renew letsencrypt"
+      minute: "0"
+      hour: "5" 
+      job: "python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew"
+      user: "{{ worker_name }}"
+    become: true 
+
