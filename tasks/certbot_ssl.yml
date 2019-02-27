@@ -1,0 +1,49 @@
+- name: "Tasks for certbot"
+  block:
+  - name: "check if certificate exists for server"
+    stat:
+      path: "/etc/letsencrypt/live/{{apache_vhosts[0].servername }}/cert.pem"
+    register: "letsencrypt_cert"
+  
+  - name: "copy config used by certbot to server"
+    template:
+      src: "temp.conf.j2"
+      dest: "/etc/httpd/conf.d/temp.conf"
+    when: "not letsencrypt_cert.stat.exists"
+    vars:
+      test_servername: "{{ apache_vhosts[0].servername }}"
+    become: true
+
+  - name: "install {{ certbot_packages }}"
+    yum:
+      name: "{{ certbot_packages }}"
+      state: present
+    become: true
+    when: "not letsencrypt_cert.stat.exists"
+  - name: "run command to get certificate"
+    command: "certbot --apache certonly --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}"
+    with_items: "{{ apache_vhosts }}"
+    when: "item.ssl is defined and item.ssl == true"
+    become: true  
+    when: "apache_certbot == true and not letsencrypt_cert.stat.exists"
+  
+  - name: "delete temp file from server"
+    file:
+      path: "/etc/httpd/conf.d/temp.conf"
+      state: absent
+    become: true
+  
+  - name: "Add apache vhosts ssl template"
+    template:
+      src: "{{ apache_vhosts_template_ssl }}"
+      dest: "{{ apache_conf_path }}/{{ item.servername}}_ssl.conf"
+      owner: root
+      group: root
+      mode: 0644
+    notify: restart apache
+    when: apache_create_vhosts and item.ssl is defined and item.ssl == true
+    with_items: "{{ apache_vhosts}}"
+    vars:
+      current_vhost: "{{ item.servername }}"
+  
+    

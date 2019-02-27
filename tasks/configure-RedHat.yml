@@ -13,12 +13,19 @@
   register: apache_ssl_certificates
   with_items: "{{ apache_vhosts_ssl }}"
 
+- name: Include local tasks for ssl template and certbot
+  include_tasks: "certbot_ssl.yml"
+  
 - name: Add apache vhosts configuration.
   template:
     src: "{{ apache_vhosts_template }}"
-    dest: "{{ apache_conf_path }}/{{ apache_vhosts_filename }}"
+    dest: "{{ apache_conf_path }}/{{ item.servername}}.conf"
     owner: root
     group: root
     mode: 0644
   notify: restart apache
   when: apache_create_vhosts
+  vars:
+    current_vhost: "{{ item.servername }}"
+  with_items: " {{ apache_vhosts }}"
+
