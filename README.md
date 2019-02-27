@@ -2,13 +2,24 @@
 
 [![Build Status](https://travis-ci.org/geerlingguy/ansible-role-apache.svg?branch=master)](https://travis-ci.org/geerlingguy/ansible-role-apache)
 
-An Ansible Role that installs Apache 2.x on RHEL/CentOS, Debian/Ubuntu, SLES and Solaris.
+A local rewrite of geerlingguy/ansible-role-apache with some local modifications. Since all local hosts use centos-7, modifications are specific for centos-7.
+
+## Additions
+
+* adding settings for setting up certbot with httpd certbot.
+
+* Denying .git folder as default in vhost configs.
+
+* Splitting http and https into two configs.
+
+* Using default ssl settings from certbot installation.
+
+* apache certbot
 
 ## Requirements
 
-If you are using SSL/TLS, you will need to provide your own certificate and key files. You can generate a self-signed certificate with a command like `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout example.key -out example.crt`.
+Local modification requires a centos-7 host.
 
-If you are using Apache with PHP, I recommend using the `geerlingguy.php` role to install PHP, and you can either use mod_php (by adding the proper package, e.g. `libapache2-mod-php5` for Ubuntu, to `php_packages`), or by also using `geerlingguy.apache-php-fpm` to connect Apache to PHP via FPM. See that role's README for more info.
 
 ## Role Variables
 
