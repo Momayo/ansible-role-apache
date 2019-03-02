@@ -40,12 +40,23 @@
       owner: root
       group: root
       mode: 0644
+
     notify: restart apache
     when: apache_create_vhosts and item.ssl is defined and item.ssl == true
     with_items: "{{ apache_vhosts}}"
     vars:
       current_vhost: "{{ item.servername }}"
- 
+  - name: "Set rights on letsencrypt directory"
+    file:
+      path: "/etc/letsencrypt"
+      state: directory
+      owner: "{{ worker_name }}"
+      group: "root"
+      mode: "u=rwX,g=rX"
+      recurse: "yes"
+    become: true
+
+
   - name: "Add commands to sudoers file"
     lineinfile:
       path: /etc/sudoers
