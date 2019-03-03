@@ -23,6 +23,7 @@
     owner: root
     group: root
     mode: 0644
+    validate: "httpd -t -f %s"
   notify: restart apache
   when: apache_create_vhosts
   vars:

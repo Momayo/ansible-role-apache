@@ -40,7 +40,7 @@
       owner: root
       group: root
       mode: 0644
-
+      validate: "httpd -t -f %s"
     notify: restart apache
     when: apache_create_vhosts and item.ssl is defined and item.ssl == true
     with_items: "{{ apache_vhosts}}"
@@ -70,7 +70,7 @@
       name: "renew letsencrypt"
       minute: "0"
       hour: "5" 
-      job: "python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew"
+      job: "python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew > /dev/null"
       user: "{{ worker_name }}"
     become: true 
 
