@@ -61,5 +61,4 @@ apache_packages_state: present
 # local variables
 apache_deny_git: true
 apache_certbot: false
-apache_certbot_dry_run: true
 

@@ -18,10 +18,48 @@ A local rewrite of geerlingguy/ansible-role-apache with some local modifications
 
 ## Requirements
 
-Local modification requires a centos-7 host.
+Local modifications requires a centos-7 host.
 
 
-## Role Variables
+## Local changes
+
+Local variables: 
+apache_vhosts_template_ssl: Defaults to template using letsencrypt with certbot.
+
+certbot_ssl_debug: Default false (if set, uses --test-cert flag for letsencrypt (self-signed))
+apache_deny_git: Default true, adds deny rule for .git b
+apache_certbot: Default false (enables and installs certbot and certificates)
+
+vhost.http_only_extra_parameters ()
+vhost.ssl (undef, true if ssl to be used)
+
+## Example playbook
+
+```
+  - import_role:
+      name: "httpd"
+    vars:
+      apache_certbot: true
+      apache_vhosts:
+        - servername: "example.com"
+          serveradmin: "root@example.com"
+          serveralias: "www.example.com"
+          extra_parameters: |
+            ProxyPass /translations !
+            ProxyPass / http://localhost:8080/service
+            Alias /translations /data/menota/translations
+            <Directory /data/menota/translations>
+            Require all granted
+            </Directory>
+          http_only_extra_parameters: |
+            ProxyPass /example.dtd http://localhost:8080/service/example.dtd
+          ssl: true
+    become: true
+    tags:
+      - httpd
+```
+
+* End of local changes * 
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
