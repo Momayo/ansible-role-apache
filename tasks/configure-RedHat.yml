@@ -6,7 +6,17 @@
     line: "{{ item.line }}"
     state: present
   with_items: "{{ apache_ports_configuration_items }}"
-  notify: restart apache
+  notify: "restart apache"
+
+- name: "delete centos autoindex, welcome, userdir conf"
+  file: 
+    path: "/etc/httpd/conf.d/{{ item }}"
+    state: "absent"
+  with_items:
+    - "welcome.conf"
+    - "autoindex.conf"
+    - "userdir.conf"
+  notify: "restart apache"
 
 - name: Check whether certificates defined in vhosts exist.
   stat: path={{ item.certificate_file }}
@@ -22,11 +32,32 @@
     dest: "{{ apache_conf_path }}/{{ item.servername}}.conf"
     owner: root
     group: root
+    backup: true
     mode: 0644
-    validate: "httpd -t -f %s"
+    # validate: "httpd -t -f %s"
   notify: restart apache
   when: apache_create_vhosts
   vars:
     current_vhost: "{{ item.servername }}"
   with_items: " {{ apache_vhosts }}"
 
+- name: "validate status with apachectl"
+  command: apachectl -t
+  register: apache_result
+  ignore_errors: yes
+  tags: httpd
+  become: true
+
+- name: "Ending play if configtest fails"
+  fail:
+     msg: "Apache configuration is invalid. Please check before re-running the playbook."
+  when: apache_result is failed
+  tags: httpd
+  become: true
+
+- name: "deleting backup config files"
+  command: 'find -ipath "*conf.[0-9][0-9][0-9][0-9][0-9].[0-9]*" -delete'
+  args:
+    chdir: "{{ apache_conf_path }}/"
+  become: true
+  

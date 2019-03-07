@@ -43,10 +43,8 @@ Require all denied
 {%endif %}
 
 {% if vhost.ssl is defined and vhost.ssl == true %}
-
-RewriteEngine on
-RewriteCond %{SERVER_NAME} ={{vhost.servername}}
-RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+{{ vhost.http_only_extra_parameters | default('') }}
+Redirect Permanent / https://{{ vhost.servername }}/
 
 {% endif %}
 </VirtualHost>
