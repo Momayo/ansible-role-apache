@@ -56,7 +56,7 @@
   become: true
 
 - name: "deleting backup config files"
-  command: 'find -ipath "*conf.[0-9][0-9][0-9][0-9][0-9].[0-9]*" -delete'
+  command: 'find -ipath "*conf.[0-9][0-9][0-9][0-9]*.[0-9]*" -delete'
   args:
     chdir: "{{ apache_conf_path }}/"
   become: true
