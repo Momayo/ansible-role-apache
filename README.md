@@ -19,7 +19,7 @@ A local rewrite of geerlingguy/ansible-role-apache with some local modifications
 ## Requirements
 
 Local modifications requires a centos-7 host.
-
+If cronjob for ssl renewal is set, chronic (more-utils) is required.
 
 ## Local changes
 
