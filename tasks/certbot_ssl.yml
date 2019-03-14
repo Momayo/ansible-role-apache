@@ -2,9 +2,9 @@
   block:
   - name: "check if certificate exists for server"
     stat:
-      path: "/etc/letsencrypt/live/{{apache_vhosts[0].servername }}/cert.pem"
+      path: "/etc/letsencrypt/live/{{ apache_vhosts[0].servername }}/cert.pem"
     register: "letsencrypt_cert"
-  
+
   - name: "copy config used by certbot to server"
     template:
       backup: true
@@ -21,31 +21,31 @@
       state: present
     become: true
     when: "not letsencrypt_cert.stat.exists"
-  
+
   - name: "run command to get certificate"
     command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}"
     with_items: "{{ apache_vhosts }}"
-    become: true  
-    when: "apache_certbot == true and not letsencrypt_cert.stat.exists and item.ssl is defined and item.ssl== true"
-  
+    become: true
+    when: "apache_certbot and not letsencrypt_cert.stat.exists and item.ssl is defined and item.ssl"
+
   - name: "delete temp file from server"
     file:
       path: "/etc/httpd/conf.d/temp.conf"
       state: absent
     become: true
-  
+
   - name: "Add apache vhosts ssl template"
     template:
       src: "{{ apache_vhosts_template_ssl }}"
-      dest: "{{ apache_conf_path }}/{{ item.servername}}_ssl.conf"
+      dest: "{{ apache_conf_path }}/{{ item.servername }}_ssl.conf"
       owner: root
       group: root
       mode: 0644
       backup: true
       #    validate: "apachectl configtest"
     notify: restart apache
-    when: apache_create_vhosts and item.ssl is defined and item.ssl == true
-    with_items: "{{ apache_vhosts}}"
+    when: apache_create_vhosts and item.ssl is defined and item.ssl
+    with_items: "{{ apache_vhosts }}"
     vars:
       current_vhost: "{{ item.servername }}"
     become: true
@@ -57,12 +57,12 @@
       validate: '/usr/sbin/visudo -cf %s'
     with_items:
       - "{{ worker_name }} ALL=(ALL) NOPASSWD: /usr/bin/certbot renew"
-  
+
   - name: "add cron job"
     cron:
       name: "renew letsencrypt (/var/log/letsencrypt/letsencrypt.log)"
       minute: "0"
-      hour: "5" 
+      hour: "5"
       job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew\""
       user: "{{ worker_name }}"
     become: true
