@@ -1,4 +1,11 @@
-- name: "Tasks for certbot"
+- name: "Register if any hosts has ssl"
+  debug: 
+    msg: "set variable if some vhost has ssl defined"
+  with_items: "{{ apache_vhosts }}"
+  register: "apache_vhost_has_ssl"
+  when: "item.ssl is defined and item.ssl"
+
+- name: "block if ssl is set" 
   block:
   - name: "check if certificate exists for server"
     stat:
@@ -66,3 +73,4 @@
       job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew\""
       user: "{{ worker_name }}"
     become: true
+  when: "apache_certbot"
