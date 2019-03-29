@@ -28,7 +28,11 @@
       state: present
     become: true
     when: "not letsencrypt_cert.stat.exists"
-
+  - name: "start httpd"
+    systemd:
+      name: "httpd"
+      state: "started"
+    become: true
   - name: "run command to get certificate"
     command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}"
     with_items: "{{ apache_vhosts }}"
