@@ -67,14 +67,14 @@
       line: "{{ item }}"
       validate: '/usr/sbin/visudo -cf %s'
     with_items:
-      - "{{ worker_name }} ALL=(ALL) NOPASSWD: /usr/bin/certbot renew"
+      - "{{ worker_name }} ALL=(ALL) NOPASSWD: /usr/bin/certbot renew --post-hook /usr/bin/systemctl reload httpd"
 
   - name: "add cron job"
     cron:
       name: "renew letsencrypt (/var/log/letsencrypt/letsencrypt.log)"
       minute: "0"
       hour: "5"
-      job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew\""
+      job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew --post-hook '/usr/bin/systemctl reload httpd'\""
       user: "{{ worker_name }}"
     become: true
   when: "apache_certbot"
