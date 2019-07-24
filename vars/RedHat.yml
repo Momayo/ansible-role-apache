@@ -19,3 +19,4 @@ apache_ports_configuration_items:
 certbot_packages:
   - python2-certbot-apache
   - certbot
+  - moreutils
