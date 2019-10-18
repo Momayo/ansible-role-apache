@@ -8,7 +8,7 @@
 {% if vhost.documentroot is defined %}
   DocumentRoot "{{ vhost.documentroot }}"
 {% endif %}
-
+   Include /etc/letsencrypt/options-ssl-apache.conf
 {% if apache_vhosts_version == "2.4" %}
   SSLCompression off
 {% endif %}
@@ -16,9 +16,9 @@
 {% set default_cert_file = letsencrypt_vhost_path + 'cert.pem' %}
 {% set default_cert_key = letsencrypt_vhost_path + 'privkey.pem' %}
 {% set default_chain_file = letsencrypt_vhost_path + 'chain.pem' %}
+  
   SSLCertificateFile {{ vhost.certificate_file | default(default_cert_file) }}
   SSLCertificateKeyFile {{ vhost.certificate_key_file | default(default_cert_key) }}
-  Include /etc/letsencrypt/options-ssl-apache.conf
   SSLCertificateChainFile {{vhost.certificate_chain_file | default(default_chain_file) }}
 
 {% if vhost.serveradmin is defined %}

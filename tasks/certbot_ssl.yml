@@ -27,7 +27,7 @@
       name: "{{ certbot_packages }}"
       state: present
     become: true
-    when: "not letsencrypt_cert.stat.exists"
+
   - name: "start httpd"
     systemd:
       name: "httpd"
@@ -48,7 +48,7 @@
   - name: "Add apache vhosts ssl template"
     template:
       src: "{{ apache_vhosts_template_ssl }}"
-      dest: "{{ apache_conf_path }}/{{ item.servername }}_ssl.conf"
+      dest: "{{ apache_conf_path }}/00_{{ item.servername }}_ssl.conf"
       owner: root
       group: root
       mode: 0644
@@ -59,6 +59,15 @@
     with_items: "{{ apache_vhosts }}"
     vars:
       current_vhost: "{{ item.servername }}"
+    become: true
+
+  - name: "add sefcontext httpd-config to options-ssl-apache.conf"
+    sefcontext:
+      target: "/etc/letsencrypt/options-ssl-apache.conf"
+      setype: "httpd_config_t"
+    become: true
+  - name: "Restorecon on options"
+    command: "restorecon -r -R -v /etc/letsencrypt/options-ssl-apache.conf"
     become: true
 
   - name: "Add commands to sudoers file"
