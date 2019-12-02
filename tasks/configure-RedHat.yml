@@ -40,7 +40,7 @@
     current_vhost: "{{ item.servername }}"
   with_items: "{{ apache_vhosts }}"
 
-- name: "validate status with apachectl"
+- name: "validate status with apachectl" # noqa 503
   command: apachectl -t
   register: apache_result
   ignore_errors: yes

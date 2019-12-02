@@ -1,11 +1,11 @@
 - name: "Register if any hosts has ssl"
-  debug: 
+  debug:
     msg: "set variable if some vhost has ssl defined"
   with_items: "{{ apache_vhosts }}"
   register: "apache_vhost_has_ssl"
   when: "item.ssl is defined and item.ssl"
 
-- name: "block if ssl is set" 
+- name: "block if ssl is set"
   block:
   - name: "check if certificate exists for server"
     stat:
@@ -34,7 +34,7 @@
       state: "started"
     become: true
   - name: "run command to get certificate"
-    command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}"
+    command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ item.servername }}" # noqa 204
     with_items: "{{ apache_vhosts }}"
     become: true
     when: "apache_certbot and not letsencrypt_cert.stat.exists and item.ssl is defined and item.ssl"
@@ -83,7 +83,7 @@
       name: "renew letsencrypt (/var/log/letsencrypt/letsencrypt.log)"
       minute: "0"
       hour: "5"
-      job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew --post-hook '/usr/bin/systemctl reload httpd'\""
+      job: "chronic sh -c \"python -c 'import random; import time; time.sleep(random.random() * 3600)' && sudo /usr/bin/certbot renew --post-hook '/usr/bin/systemctl reload httpd'\"" # noqa 204
       user: "{{ worker_name }}"
     become: true
   when: "apache_certbot"
