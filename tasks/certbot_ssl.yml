@@ -33,8 +33,10 @@
       name: "httpd"
       state: "started"
     become: true
+
+     
   - name: "run command to get certificate"
-    command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {{ [item.servername, item.serveralias | default()] | join(',') }}" # noqa 204
+    command: "certbot --apache certonly {{ certbot_ssl_dry_run }} --non-interactive --agree-tos --email {{ item.serveradmin }} -d {%if item.serveralias is defined %} {{ [item.servername, item.serveralias ] | join(',') }} {% else %} {{ item.servername }} {% endif %}" # noqa 204
     with_items: "{{ apache_vhosts }}"
     become: true
     when: "apache_certbot and not letsencrypt_cert.stat.exists and item.ssl is defined and item.ssl"
